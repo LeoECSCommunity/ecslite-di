@@ -1,0 +1,19 @@
+{
+    "name": "com.leopotam.ecslite.di",
+    "author": "Leopotam",
+    "displayName": "LeoECS Lite Dependency Injection",
+    "description": "Dependency injection for LeoECS Lite.",
+    "unity": "2020.3",
+    "version": "2021.8.22-preview",
+    "keywords": [
+        "leoecslite",
+        "leoecs",
+        "ecs",
+        "performance"
+    ],
+    "dependencies": {},
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Leopotam/ecslite-di.git"
+    }
+}
