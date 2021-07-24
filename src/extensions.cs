@@ -53,6 +53,9 @@ namespace Leopotam.EcsLite.Di {
         }
     }
 
+    [AttributeUsage (AttributeTargets.Field)]
+    public sealed class EcsSharedAttribute : Attribute { }
+
     public static class Extensions {
         static readonly Type WorldType = typeof (EcsWorld);
         static readonly Type WorldAttrType = typeof (EcsWorldAttribute);
@@ -61,6 +64,7 @@ namespace Leopotam.EcsLite.Di {
         static readonly Type FilterType = typeof (EcsFilter);
         static readonly Type FilterAttrType = typeof (EcsFilterAttribute);
         static readonly Type FilterExcAttrType = typeof (EcsFilterExcludeAttribute);
+        static readonly Type SharedAttrType = typeof (EcsSharedAttribute);
         static readonly MethodInfo WorldGetPoolMethod = typeof (EcsWorld).GetMethod ("GetPool");
         static readonly MethodInfo WorldFilterMethod = typeof (EcsWorld).GetMethod ("Filter");
         static readonly MethodInfo MaskIncMethod = typeof (EcsFilter.Mask).GetMethod ("Inc");
@@ -73,6 +77,8 @@ namespace Leopotam.EcsLite.Di {
         public static EcsSystems Inject (this EcsSystems systems) {
             IEcsSystem[] allSystems = null;
             var systemsCount = systems.GetAllSystems (ref allSystems);
+            var shared = systems.GetShared<object> ();
+            var sharedType = shared?.GetType ();
 
             for (var i = 0; i < systemsCount; i++) {
                 var system = allSystems[i];
@@ -85,6 +91,8 @@ namespace Leopotam.EcsLite.Di {
                     if (InjectPool (f, system, systems)) { continue; }
                     // EcsFilter.
                     if (InjectFilter (f, system, systems)) { continue; }
+                    // Shared.
+                    if (InjectShared (f, system, shared, sharedType)) { continue; }
                 }
             }
 
@@ -168,6 +176,16 @@ namespace Leopotam.EcsLite.Di {
                         }
                     }
                     fieldInfo.SetValue (system, mask.End ());
+                }
+                return true;
+            }
+            return false;
+        }
+
+        static bool InjectShared (FieldInfo fieldInfo, IEcsSystem system, object shared, Type sharedType) {
+            if (shared != null && Attribute.IsDefined (fieldInfo, SharedAttrType)) {
+                if (fieldInfo.FieldType.IsAssignableFrom (sharedType)) {
+                    fieldInfo.SetValue (system, shared);
                 }
                 return true;
             }

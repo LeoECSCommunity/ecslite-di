@@ -15,6 +15,7 @@ Dependency injection for [LeoECS Lite](https://github.com/Leopotam/ecslite).
     * [EcsWorldAttribute](#ecsworldattribute)
     * [EcsPoolAttribute](#ecspoolattribute)
     * [EcsFilterAttribute](#ecsfilterattribute)
+    * [EcsSharedAttribute](#ecssharedattribute)
 * [License](#license)
 
 # Socials
@@ -109,6 +110,19 @@ class TestSystem : IEcsRunSystem {
     // field will be injected with filter (C1 included, C2 excluded)
     // from "events" world instance.
     readonly EcsFilter _eventsFilter11 = default;
+
+    public void Run (EcsSystems systems) {
+        // all injected fields can be used here.
+    }
+}
+```
+
+## EcsSharedAttribute
+```csharp
+class TestSystem : IEcsRunSystem {
+    [EcsShared]
+    // field will be injected with GetShared() instance from EcsSystems.
+    readonly Shared _shared = default;
 
     public void Run (EcsSystems systems) {
         // all injected fields can be used here.
