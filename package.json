@@ -4,11 +4,13 @@
     "displayName": "LeoECS Lite Dependency Injection",
     "description": "Dependency injection for LeoECS Lite.",
     "unity": "2020.3",
-    "version": "2021.8.22-preview",
+    "version": "2021.8.22",
     "keywords": [
         "leoecslite",
         "leoecs",
         "ecs",
+        "dependency injection",
+        "di",
         "performance"
     ],
     "dependencies": {},
