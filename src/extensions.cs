@@ -65,10 +65,10 @@ namespace Leopotam.EcsLite.Di {
         static readonly Type FilterAttrType = typeof (EcsFilterAttribute);
         static readonly Type FilterExcAttrType = typeof (EcsFilterExcludeAttribute);
         static readonly Type SharedAttrType = typeof (EcsSharedAttribute);
-        static readonly MethodInfo WorldGetPoolMethod = typeof (EcsWorld).GetMethod ("GetPool");
-        static readonly MethodInfo WorldFilterMethod = typeof (EcsWorld).GetMethod ("Filter");
-        static readonly MethodInfo MaskIncMethod = typeof (EcsFilter.Mask).GetMethod ("Inc");
-        static readonly MethodInfo MaskExcMethod = typeof (EcsFilter.Mask).GetMethod ("Exc");
+        static readonly MethodInfo WorldGetPoolMethod = typeof (EcsWorld).GetMethod (nameof (EcsWorld.GetPool));
+        static readonly MethodInfo WorldFilterMethod = typeof (EcsWorld).GetMethod (nameof (EcsWorld.Filter));
+        static readonly MethodInfo MaskIncMethod = typeof (EcsFilter.Mask).GetMethod (nameof (EcsFilter.Mask.Inc));
+        static readonly MethodInfo MaskExcMethod = typeof (EcsFilter.Mask).GetMethod (nameof (EcsFilter.Mask.Exc));
         static readonly Dictionary<Type, MethodInfo> GetPoolMethodsCache = new Dictionary<Type, MethodInfo> (256);
         static readonly Dictionary<Type, MethodInfo> FilterMethodsCache = new Dictionary<Type, MethodInfo> (256);
         static readonly Dictionary<Type, MethodInfo> MaskIncMethodsCache = new Dictionary<Type, MethodInfo> (256);
