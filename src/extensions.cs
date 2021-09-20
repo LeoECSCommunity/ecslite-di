@@ -133,10 +133,12 @@ namespace Leopotam.EcsLite.Di {
 
         static bool InjectWorld (FieldInfo fieldInfo, IEcsSystem system, EcsSystems systems) {
             if (fieldInfo.FieldType == WorldType) {
+                string worldName = null;
                 if (Attribute.IsDefined (fieldInfo, WorldAttrType)) {
                     var worldAttr = (EcsWorldAttribute) Attribute.GetCustomAttribute (fieldInfo, WorldAttrType);
-                    fieldInfo.SetValue (system, systems.GetWorld (worldAttr.World));
+                    worldName = worldAttr.World;
                 }
+                fieldInfo.SetValue (system, systems.GetWorld (worldName));
                 return true;
             }
             return false;
@@ -144,12 +146,14 @@ namespace Leopotam.EcsLite.Di {
 
         static bool InjectPool (FieldInfo fieldInfo, IEcsSystem system, EcsSystems systems) {
             if (fieldInfo.FieldType.IsGenericType && fieldInfo.FieldType.GetGenericTypeDefinition () == PoolType) {
+                string worldName = null;
                 if (Attribute.IsDefined (fieldInfo, PoolAttrType)) {
                     var poolAttr = (EcsPoolAttribute) Attribute.GetCustomAttribute (fieldInfo, PoolAttrType);
-                    var world = systems.GetWorld (poolAttr.World);
-                    var componentTypes = fieldInfo.FieldType.GetGenericArguments ();
-                    fieldInfo.SetValue (system, GetGenericGetPoolMethod (componentTypes[0]).Invoke (world, null));
+                    worldName = poolAttr.World;
                 }
+                var world = systems.GetWorld (worldName);
+                var componentTypes = fieldInfo.FieldType.GetGenericArguments ();
+                fieldInfo.SetValue (system, GetGenericGetPoolMethod (componentTypes[0]).Invoke (world, null));
                 return true;
             }
             return false;

@@ -58,10 +58,12 @@ class TestSystem : IEcsRunSystem {
     [EcsWorld]
     // field will be injected with default world instance.
     readonly EcsWorld _defaultWorld = default;
+    // for default world EcsWorld-attribute can be omitted.
+    readonly EcsWorld _defaultWorld2 = default;
     
     [EcsWorld ("events")]
     // field will be injected with "events" world instance.
-    readonly EcsWorld _defaultWorld = default;
+    readonly EcsWorld _eventsWorld = default;
 
     public void Run (EcsSystems systems) {
         // all injected fields can be used here.
@@ -75,6 +77,8 @@ class TestSystem : IEcsRunSystem {
     [EcsPool]
     // field will be injected with pool from default world instance.
     readonly EcsPool<C1> _c1Pool = default;
+    // for default world EcsPool-attribute can be omitted.
+    readonly EcsPool<C1> _c1Pool2 = default;
     
     [EcsPool ("events")]
     // field will be injected with pool from "events" world instance.
