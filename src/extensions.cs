@@ -65,10 +65,10 @@ namespace Leopotam.EcsLite.Di {
         static readonly Type FilterAttrType = typeof (EcsFilterAttribute);
         static readonly Type FilterExcAttrType = typeof (EcsFilterExcludeAttribute);
         static readonly Type SharedAttrType = typeof (EcsSharedAttribute);
-        static readonly MethodInfo WorldGetPoolMethod = typeof (EcsWorld).GetMethod ("GetPool");
-        static readonly MethodInfo WorldFilterMethod = typeof (EcsWorld).GetMethod ("Filter");
-        static readonly MethodInfo MaskIncMethod = typeof (EcsFilter.Mask).GetMethod ("Inc");
-        static readonly MethodInfo MaskExcMethod = typeof (EcsFilter.Mask).GetMethod ("Exc");
+        static readonly MethodInfo WorldGetPoolMethod = typeof (EcsWorld).GetMethod (nameof (EcsWorld.GetPool));
+        static readonly MethodInfo WorldFilterMethod = typeof (EcsWorld).GetMethod (nameof (EcsWorld.Filter));
+        static readonly MethodInfo MaskIncMethod = typeof (EcsFilter.Mask).GetMethod (nameof (EcsFilter.Mask.Inc));
+        static readonly MethodInfo MaskExcMethod = typeof (EcsFilter.Mask).GetMethod (nameof (EcsFilter.Mask.Exc));
         static readonly Dictionary<Type, MethodInfo> GetPoolMethodsCache = new Dictionary<Type, MethodInfo> (256);
         static readonly Dictionary<Type, MethodInfo> FilterMethodsCache = new Dictionary<Type, MethodInfo> (256);
         static readonly Dictionary<Type, MethodInfo> MaskIncMethodsCache = new Dictionary<Type, MethodInfo> (256);
@@ -133,10 +133,12 @@ namespace Leopotam.EcsLite.Di {
 
         static bool InjectWorld (FieldInfo fieldInfo, IEcsSystem system, EcsSystems systems) {
             if (fieldInfo.FieldType == WorldType) {
+                string worldName = null;
                 if (Attribute.IsDefined (fieldInfo, WorldAttrType)) {
                     var worldAttr = (EcsWorldAttribute) Attribute.GetCustomAttribute (fieldInfo, WorldAttrType);
-                    fieldInfo.SetValue (system, systems.GetWorld (worldAttr.World));
+                    worldName = worldAttr.World;
                 }
+                fieldInfo.SetValue (system, systems.GetWorld (worldName));
                 return true;
             }
             return false;
@@ -144,12 +146,14 @@ namespace Leopotam.EcsLite.Di {
 
         static bool InjectPool (FieldInfo fieldInfo, IEcsSystem system, EcsSystems systems) {
             if (fieldInfo.FieldType.IsGenericType && fieldInfo.FieldType.GetGenericTypeDefinition () == PoolType) {
+                string worldName = null;
                 if (Attribute.IsDefined (fieldInfo, PoolAttrType)) {
                     var poolAttr = (EcsPoolAttribute) Attribute.GetCustomAttribute (fieldInfo, PoolAttrType);
-                    var world = systems.GetWorld (poolAttr.World);
-                    var componentTypes = fieldInfo.FieldType.GetGenericArguments ();
-                    fieldInfo.SetValue (system, GetGenericGetPoolMethod (componentTypes[0]).Invoke (world, null));
+                    worldName = poolAttr.World;
                 }
+                var world = systems.GetWorld (worldName);
+                var componentTypes = fieldInfo.FieldType.GetGenericArguments ();
+                fieldInfo.SetValue (system, GetGenericGetPoolMethod (componentTypes[0]).Invoke (world, null));
                 return true;
             }
             return false;
