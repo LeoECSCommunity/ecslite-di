@@ -16,6 +16,7 @@ Dependency injection for [LeoECS Lite](https://github.com/Leopotam/ecslite).
     * [EcsPoolAttribute](#ecspoolattribute)
     * [EcsFilterAttribute](#ecsfilterattribute)
     * [EcsSharedAttribute](#ecssharedattribute)
+    * [EcsInjectAttribute](#ecsinjectattribute)
 * [License](#license)
 
 # Socials
@@ -58,8 +59,6 @@ class TestSystem : IEcsRunSystem {
     [EcsWorld]
     // field will be injected with default world instance.
     readonly EcsWorld _defaultWorld = default;
-    // for default world EcsWorld-attribute can be omitted.
-    readonly EcsWorld _defaultWorld2 = default;
     
     [EcsWorld ("events")]
     // field will be injected with "events" world instance.
@@ -77,8 +76,6 @@ class TestSystem : IEcsRunSystem {
     [EcsPool]
     // field will be injected with pool from default world instance.
     readonly EcsPool<C1> _c1Pool = default;
-    // for default world EcsPool-attribute can be omitted.
-    readonly EcsPool<C1> _c1Pool2 = default;
     
     [EcsPool ("events")]
     // field will be injected with pool from "events" world instance.
@@ -127,6 +124,28 @@ class TestSystem : IEcsRunSystem {
     [EcsShared]
     // field will be injected with GetShared() instance from EcsSystems.
     readonly Shared _shared = default;
+
+    public void Run (EcsSystems systems) {
+        // all injected fields can be used here.
+    }
+}
+```
+
+## EcsInjectAttribute
+```csharp
+systems
+    .Add (new TestSystem ())
+    .Inject (new CustomData1 (), new CustomData2 ())
+    .Init ();
+// ...
+class TestSystem : IEcsRunSystem {
+    [EcsInject]
+    // field will be injected with instance from EcsSystems.Inject() call.
+    readonly CustomData1 _custom1 = default;
+    
+    [EcsInject]
+    // field will be injected with instance from EcsSystems.Inject() call.
+    readonly CustomData2 _custom2 = default;
 
     public void Run (EcsSystems systems) {
         // all injected fields can be used here.
