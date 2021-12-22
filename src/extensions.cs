@@ -71,8 +71,8 @@ namespace Leopotam.EcsLite.Di {
         static readonly Type InjectAttrType = typeof (EcsInjectAttribute);
         static readonly MethodInfo WorldGetPoolMethod = typeof (EcsWorld).GetMethod (nameof (EcsWorld.GetPool));
         static readonly MethodInfo WorldFilterMethod = typeof (EcsWorld).GetMethod (nameof (EcsWorld.Filter));
-        static readonly MethodInfo MaskIncMethod = typeof (EcsFilter.Mask).GetMethod (nameof (EcsFilter.Mask.Inc));
-        static readonly MethodInfo MaskExcMethod = typeof (EcsFilter.Mask).GetMethod (nameof (EcsFilter.Mask.Exc));
+        static readonly MethodInfo MaskIncMethod = typeof (EcsWorld.Mask).GetMethod (nameof (EcsWorld.Mask.Inc));
+        static readonly MethodInfo MaskExcMethod = typeof (EcsWorld.Mask).GetMethod (nameof (EcsWorld.Mask.Exc));
         static readonly Dictionary<Type, MethodInfo> GetPoolMethodsCache = new Dictionary<Type, MethodInfo> (256);
         static readonly Dictionary<Type, MethodInfo> FilterMethodsCache = new Dictionary<Type, MethodInfo> (256);
         static readonly Dictionary<Type, MethodInfo> MaskIncMethodsCache = new Dictionary<Type, MethodInfo> (256);
@@ -167,7 +167,7 @@ namespace Leopotam.EcsLite.Di {
                 if (Attribute.IsDefined (fieldInfo, FilterAttrType)) {
                     var filterAttr = (EcsFilterAttribute) Attribute.GetCustomAttribute (fieldInfo, FilterAttrType);
                     var world = systems.GetWorld (filterAttr.World);
-                    var mask = (EcsFilter.Mask) GetGenericFilterMethod (filterAttr.Inc1).Invoke (world, null);
+                    var mask = (EcsWorld.Mask) GetGenericFilterMethod (filterAttr.Inc1).Invoke (world, null);
                     if (filterAttr.Others != null) {
                         foreach (var type in filterAttr.Others) {
                             GetGenericMaskIncMethod (type).Invoke (mask, null);
