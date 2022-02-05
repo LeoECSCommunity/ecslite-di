@@ -1,14 +1,18 @@
 // -----------------------------------------------------------------------------------------
 // The MIT License
-// Dependency injection for LeoECS Lite https://github.com/Leopotam/ecslite-extendedsystems
-// Copyright (c) 2021 Leopotam <leopotam@gmail.com>
+// Dependency injection for LeoECS Lite https://github.com/Leopotam/ecslite-di
+// Copyright (c) 2021-2022 Leopotam <leopotam@gmail.com>
 // -----------------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+#pragma warning disable CS0618
 
 namespace Leopotam.EcsLite.Di {
+#if DEBUG
+    [Obsolete ("Use EcsWorldInject instead.")]
+#endif
     [AttributeUsage (AttributeTargets.Field)]
     public sealed class EcsWorldAttribute : Attribute {
         public readonly string World;
@@ -18,6 +22,9 @@ namespace Leopotam.EcsLite.Di {
         }
     }
 
+#if DEBUG
+    [Obsolete ("Use EcsPoolInject<> instead.")]
+#endif
     [AttributeUsage (AttributeTargets.Field)]
     public sealed class EcsPoolAttribute : Attribute {
         public readonly string World;
@@ -27,6 +34,9 @@ namespace Leopotam.EcsLite.Di {
         }
     }
 
+#if DEBUG
+    [Obsolete ("Use EcsFilterInject<> instead.")]
+#endif
     [AttributeUsage (AttributeTargets.Field)]
     public sealed class EcsFilterAttribute : Attribute {
         public readonly string World;
@@ -42,6 +52,9 @@ namespace Leopotam.EcsLite.Di {
         }
     }
 
+#if DEBUG
+    [Obsolete ("Use EcsFilterInject<> instead.")]
+#endif
     [AttributeUsage (AttributeTargets.Field)]
     public sealed class EcsFilterExcludeAttribute : Attribute {
         public readonly Type Exc1;
@@ -53,9 +66,15 @@ namespace Leopotam.EcsLite.Di {
         }
     }
 
+#if DEBUG
+    [Obsolete ("Use EcsSharedInject<> instead.")]
+#endif
     [AttributeUsage (AttributeTargets.Field)]
     public sealed class EcsSharedAttribute : Attribute { }
 
+#if DEBUG
+    [Obsolete ("Use EcsDataInject<> instead.")]
+#endif
     [AttributeUsage (AttributeTargets.Field)]
     public sealed class EcsInjectAttribute : Attribute { }
 
@@ -100,6 +119,10 @@ namespace Leopotam.EcsLite.Di {
                     if (InjectShared (f, system, shared, sharedType)) { continue; }
                     // Inject.
                     if (InjectCustomData (f, system, injects)) { continue; }
+                    // EcsWorldInject, EcsFilterInject, EcsPoolInject, EcsSharedInject.
+                    if (InjectBuiltIns (f, system, systems)) { continue; }
+                    // EcsDataInject.
+                    if (InjectCustoms (f, system, injects)) { continue; }
                 }
             }
 
@@ -207,6 +230,26 @@ namespace Leopotam.EcsLite.Di {
                         break;
                     }
                 }
+                return true;
+            }
+            return false;
+        }
+
+        static bool InjectBuiltIns (FieldInfo fieldInfo, IEcsSystem system, EcsSystems systems) {
+            if (typeof (IEcsDataInject).IsAssignableFrom (fieldInfo.FieldType)) {
+                var instance = (IEcsDataInject) fieldInfo.GetValue (system);
+                instance.Fill (systems);
+                fieldInfo.SetValue (system, instance);
+                return true;
+            }
+            return false;
+        }
+
+        static bool InjectCustoms (FieldInfo fieldInfo, IEcsSystem system, object[] injects) {
+            if (typeof (IEcsCustomDataInject).IsAssignableFrom (fieldInfo.FieldType)) {
+                var instance = (IEcsCustomDataInject) fieldInfo.GetValue (system);
+                instance.Fill (injects);
+                fieldInfo.SetValue (system, instance);
                 return true;
             }
             return false;
