@@ -77,7 +77,7 @@ namespace Leopotam.EcsLite.Di {
     public struct EcsCustomInject<T> : IEcsCustomDataInject where T : class {
         public T Value;
 
-        public void Fill (object[] injects) {
+        void IEcsCustomDataInject.Fill (object[] injects) {
             if (injects.Length > 0) {
                 var vType = typeof (T);
                 foreach (var inject in injects) {
