@@ -130,7 +130,28 @@ public struct Inc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : IEcsInclude
     where T8 : struct
     where T9 : struct
     where T10 : struct {
+    public EcsPool<T1> Inc1;
+    public EcsPool<T2> Inc2;
+    public EcsPool<T3> Inc3;
+    public EcsPool<T4> Inc4;
+    public EcsPool<T5> Inc5;
+    public EcsPool<T6> Inc6;
+    public EcsPool<T7> Inc7;
+    public EcsPool<T8> Inc8;
+    public EcsPool<T9> Inc9;
+    public EcsPool<T10> Inc10;
+        
     public EcsWorld.Mask Fill (EcsWorld world) {
+        Inc1 = world.GetPool<T1> ();
+        Inc2 = world.GetPool<T2> ();
+        Inc3 = world.GetPool<T3> ();
+        Inc4 = world.GetPool<T4> ();
+        Inc5 = world.GetPool<T5> ();
+        Inc6 = world.GetPool<T6> ();
+        Inc7 = world.GetPool<T7> ();
+        Inc8 = world.GetPool<T8> ();
+        Inc9 = world.GetPool<T9> ();
+        Inc10 = world.GetPool<T10> ();
         return world
             .Filter<T1> ()
             .Inc<T2> ()
