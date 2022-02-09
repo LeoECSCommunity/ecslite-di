@@ -112,6 +112,9 @@ class TestSystem : IEcsRunSystem {
         // _filter2.Value.xxx
         // _filter11.Value.xxx
         // _eventsFilter11.Value.xxx
+        // even included pools:
+        // EcsPool<C1> pool1 = _filter2.Pools.Inc1;
+        // EcsPool<C2> pool2 = _filter2.Pools.Inc2;
     }
 }
 ```
