@@ -11,12 +11,12 @@ Dependency injection for [LeoECS Lite](https://github.com/Leopotam/ecslite).
     * [As unity module](#as-unity-module)
     * [As source](#as-source)
 * [Integration to startup](#integration-to-startup)
-* [Attributes](#attributes)
-    * [EcsWorldAttribute](#ecsworldattribute)
-    * [EcsPoolAttribute](#ecspoolattribute)
-    * [EcsFilterAttribute](#ecsfilterattribute)
-    * [EcsSharedAttribute](#ecssharedattribute)
-    * [EcsInjectAttribute](#ecsinjectattribute)
+* [Injectors](#injectors)
+    * [EcsWorldInject](#ecsworldinject)
+    * [EcsPoolInject](#ecspoolinject)
+    * [EcsFilterInject](#ecsfilterinject)
+    * [EcsSharedInject](#ecssharedinject)
+    * [EcsCustomInject](#ecscustominject)
 * [License](#license)
 
 # Socials
@@ -51,87 +51,158 @@ systems
     .Init ();
 ```
 
-# Attributes
+# Injectors
 
-## EcsWorldAttribute
+## EcsWorldInject
 ```csharp
 class TestSystem : IEcsRunSystem {
-    [EcsWorld]
     // field will be injected with default world instance.
-    readonly EcsWorld _defaultWorld = default;
+    readonly EcsWorldInject _defaultWorld = default;
     
-    [EcsWorld ("events")]
     // field will be injected with "events" world instance.
-    readonly EcsWorld _eventsWorld = default;
+    readonly EcsWorldInject _eventsWorld = "events";
 
     public void Run (EcsSystems systems) {
         // all injected fields can be used here.
+        // _defaultWorld.Value.xxx
+        // _eventsWorld.Value.xxx
     }
 }
 ```
 
-## EcsPoolAttribute
+## EcsPoolInject
 ```csharp
 class TestSystem : IEcsRunSystem {
-    [EcsPool]
     // field will be injected with pool from default world instance.
-    readonly EcsPool<C1> _c1Pool = default;
+    readonly EcsPoolInject<C1> _c1Pool = default;
     
-    [EcsPool ("events")]
     // field will be injected with pool from "events" world instance.
-    readonly EcsPool<C1> _c1EventsPool = default;
+    readonly EcsPoolInject<C1> _c1EventsPool = "events";
 
     public void Run (EcsSystems systems) {
         // all injected fields can be used here.
+        // _c1Pool.Value.xxx
+        // _c1EventsPool.Value.xxx
     }
 }
 ```
 
-## EcsFilterAttribute
+## EcsFilterInject
 ```csharp
 class TestSystem : IEcsRunSystem {
-    [EcsFilter (typeof (C1))]
     // field will be injected with filter (C1 included)
     // from default world instance.
-    readonly EcsFilter _filter1 = default;
+    readonly EcsFilterInject<Inc<C1>> _filter1 = default;
     
-    [EcsFilter (typeof (C1), typeof (C2))]
     // field will be injected with filter (C1,C2 included)
     // from default world instance.
-    readonly EcsFilter _filter2 = default;
+    readonly EcsFilterInject<Inc<C1, C2>> _filter2 = default;
     
-    [EcsFilter (typeof (C1))]
-    [EcsFilterExclude (typeof (C2))]
     // field will be injected with filter (C1 included, C2 excluded)
     // from default world instance.
-    readonly EcsFilter _filter11 = default;
+    readonly EcsFilter<Inc<C1>, Exc<C2>> _filter11 = default;
     
-    [EcsFilter ("events", typeof (C1))]
-    [EcsFilterExclude (typeof (C2))]
     // field will be injected with filter (C1 included, C2 excluded)
     // from "events" world instance.
-    readonly EcsFilter _eventsFilter11 = default;
+    readonly EcsFilter<Inc<C1>, Exc<C2>> _eventsFilter11 = "events";
 
     public void Run (EcsSystems systems) {
         // all injected fields can be used here.
+        // _filter1.Value.xxx
+        // _filter2.Value.xxx
+        // _filter11.Value.xxx
+        // _eventsFilter11.Value.xxx
+        // even included pools:
+        // EcsPool<C1> pool1 = _filter2.Pools.Inc1;
+        // EcsPool<C2> pool2 = _filter2.Pools.Inc2;
+    }
+}
+```
+**Important:** `Inc<>` supports up to 8 constraints, `Exc<>` supports up to 4 constraints.
+If you need more constraints, you can create new constraint type inside project.
+For example, `Inc<>` with 10 constraints:
+```csharp
+public struct Inc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : IEcsInclude
+    where T1 : struct
+    where T2 : struct
+    where T3 : struct
+    where T4 : struct
+    where T5 : struct
+    where T6 : struct
+    where T7 : struct
+    where T8 : struct
+    where T9 : struct
+    where T10 : struct {
+    public EcsPool<T1> Inc1;
+    public EcsPool<T2> Inc2;
+    public EcsPool<T3> Inc3;
+    public EcsPool<T4> Inc4;
+    public EcsPool<T5> Inc5;
+    public EcsPool<T6> Inc6;
+    public EcsPool<T7> Inc7;
+    public EcsPool<T8> Inc8;
+    public EcsPool<T9> Inc9;
+    public EcsPool<T10> Inc10;
+        
+    public EcsWorld.Mask Fill (EcsWorld world) {
+        Inc1 = world.GetPool<T1> ();
+        Inc2 = world.GetPool<T2> ();
+        Inc3 = world.GetPool<T3> ();
+        Inc4 = world.GetPool<T4> ();
+        Inc5 = world.GetPool<T5> ();
+        Inc6 = world.GetPool<T6> ();
+        Inc7 = world.GetPool<T7> ();
+        Inc8 = world.GetPool<T8> ();
+        Inc9 = world.GetPool<T9> ();
+        Inc10 = world.GetPool<T10> ();
+        return world
+            .Filter<T1> ()
+            .Inc<T2> ()
+            .Inc<T3> ()
+            .Inc<T4> ()
+            .Inc<T5> ()
+            .Inc<T6> ()
+            .Inc<T7> ()
+            .Inc<T8> ()
+            .Inc<T9> ()
+            .Inc<T10> ();
+    }
+}
+```
+Similar, `Exc<>` with 6 constraints:
+```csharp
+public struct Exc<T1, T2, T3, T4, T5, T6> : IEcsExclude
+    where T1 : struct
+    where T2 : struct
+    where T3 : struct
+    where T4 : struct
+    where T5 : struct
+    where T6 : struct {
+    public EcsWorld.Mask Fill (EcsWorld.Mask mask) {
+        return mask.Exc<T1> ()
+            .Exc<T2> ()
+            .Exc<T3> ()
+            .Exc<T4> ()
+            .Exc<T5> ()
+            .Exc<T6> ();
     }
 }
 ```
 
-## EcsSharedAttribute
+## EcsSharedInject
 ```csharp
 class TestSystem : IEcsRunSystem {
-    [EcsShared]
     // field will be injected with GetShared() instance from EcsSystems.
-    readonly Shared _shared = default;
+    readonly EcsSharedInject<Shared> _shared = default;
 
     public void Run (EcsSystems systems) {
         // all injected fields can be used here.
+        // _shared.Value.xxx
     }
 }
 ```
 
-## EcsInjectAttribute
+## EcsCustomInject
 ```csharp
 systems
     .Add (new TestSystem ())
@@ -139,16 +210,16 @@ systems
     .Init ();
 // ...
 class TestSystem : IEcsRunSystem {
-    [EcsInject]
     // field will be injected with instance from EcsSystems.Inject() call.
-    readonly CustomData1 _custom1 = default;
+    readonly EcsCustomInject<CustomData1> _custom1 = default;
     
-    [EcsInject]
     // field will be injected with instance from EcsSystems.Inject() call.
-    readonly CustomData2 _custom2 = default;
+    readonly EcsCustomInject<CustomData2> _custom2 = default;
 
     public void Run (EcsSystems systems) {
         // all injected fields can be used here.
+        // _custom1.Value.xxx
+        // _custom2.Value.xxx
     }
 }
 ```
