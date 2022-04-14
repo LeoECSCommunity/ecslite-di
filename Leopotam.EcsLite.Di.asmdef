@@ -2,7 +2,8 @@
     "name": "Leopotam.EcsLite.Di",
     "rootNamespace": "Leopotam.EcsLite.Di",
     "references": [
-        "Leopotam.EcsLite"
+        "Leopotam.EcsLite",
+        "Leopotam.EcsLite.ExtendedSystems"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
