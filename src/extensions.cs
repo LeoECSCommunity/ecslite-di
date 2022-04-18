@@ -7,6 +7,8 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Leopotam.EcsLite.ExtendedSystems;
+
 #pragma warning disable CS0618
 
 namespace Leopotam.EcsLite.Di {
@@ -121,6 +123,7 @@ namespace Leopotam.EcsLite.Di {
                     if (InjectCustomData (f, system, injects)) { continue; }
                     // EcsWorldInject, EcsFilterInject, EcsPoolInject, EcsSharedInject.
                     if (InjectBuiltIns (f, system, systems)) { continue; }
+                    if (InjectGroupSystem (f, system, systems, shared, sharedType, injects)) { continue; }
                     // EcsDataInject.
                     if (InjectCustoms (f, system, injects)) { continue; }
                 }
@@ -240,6 +243,38 @@ namespace Leopotam.EcsLite.Di {
                 var instance = (IEcsDataInject) fieldInfo.GetValue (system);
                 instance.Fill (systems);
                 fieldInfo.SetValue (system, instance);
+                return true;
+            }
+            return false;
+        }
+
+        static bool InjectGroupSystem (FieldInfo fieldInfo, IEcsSystem system, EcsSystems systems, object shared, Type sharedType, params object[] injects) {
+            if (fieldInfo.FieldType.IsGenericType && fieldInfo.FieldType.GetGenericTypeDefinition() == typeof(EcsGroupSystem<,>))
+            {
+                IEcsSystem[] childSystems = (IEcsSystem[])system.GetType().GetField("_allSystems", BindingFlags.NonPublic | BindingFlags.Instance)
+                    .GetValue(systems);
+                foreach (var childSystem in childSystems)
+                {
+                    foreach (var localFieldInfo in childSystem.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+                    {
+                        // skip statics.
+                        if (localFieldInfo.IsStatic) { continue; }
+                        // EcsWorld.
+                        if (InjectWorld (localFieldInfo, childSystem, systems)) { continue; }
+                        // EcsPool.
+                        if (InjectPool (localFieldInfo, childSystem, systems)) { continue; }
+                        // EcsFilter.
+                        if (InjectFilter (localFieldInfo, childSystem, systems)) { continue; }
+                        // Shared.
+                        if (InjectShared (localFieldInfo, childSystem, shared, sharedType)) { continue; }
+                        // Inject.
+                        if (InjectCustomData (localFieldInfo, childSystem, injects)) { continue; }
+                        // EcsWorldInject, EcsFilterInject, EcsPoolInject, EcsSharedInject.
+                        if (InjectBuiltIns (localFieldInfo, childSystem, systems)) { continue; }
+                        // EcsDataInject.
+                        if (InjectCustoms (localFieldInfo, childSystem, injects)) { continue; }
+                    }
+                }
                 return true;
             }
             return false;
